@@ -12,7 +12,8 @@ AI-powered pipeline that ingests Pinterest boards, extracts aesthetic profiles, 
 - **AI:** Anthropic API (claude-sonnet-4-6) — raw calls, no framework
 - **Pinterest:** Official OAuth v5 API (`boards:read`, `pins:read`, `boards:write`, `pins:write`)
 - **Vinted:** `vinted-api-wrapper` PyPI package (internal API wrapper); Apify fallback if wrapper breaks
-- **Auth:** Pinterest OAuth token stored locally (not server-side)
+- **Auth:** Google OAuth via NextAuth.js (frontend session); Pinterest OAuth token stored locally (not server-side)
+- **Session store:** Supabase — user records created on first Google sign-in
 
 ---
 
@@ -30,6 +31,9 @@ The Style Analyst spawns N sub-agents in parallel, each receiving a batch of ~10
 ### ADR-004: style_context.md as living correction log
 User feedback (accept/reject) is written back to `style_context.md` per session. This file is injected into the Style Analyst and Results Evaluator context on subsequent runs. Rationale: mirrors Zocdoc's `learning.md` pattern — the same mistake never happens twice.
 
+### ADR-006: Google OAuth for user identity
+User authentication is handled by Google OAuth via NextAuth.js. The session JWT is validated by FastAPI on protected API calls. User records (google_id, email) are persisted to Supabase on first sign-in. Rationale: avoids building custom auth; keeps the FastAPI side stateless (JWT verification only); Google sign-in has zero friction for the target user who likely already has a Google account open alongside Pinterest.
+
 ### ADR-005: 5 representative anchor pins passed to Results Evaluator
 Rather than passing only the text StyleProfile, the evaluator receives 5 representative pin images alongside it. Rationale: the StyleProfile is a lossy compression of the board; visual anchors preserve signal that text descriptions lose (e.g. exact tone of "muted earth").
 
@@ -38,6 +42,12 @@ Rather than passing only the text StyleProfile, the evaluator receives 5 represe
 ## Pipeline
 
 ```
+AUTH GATE
+  / (landing page — app description + "Sign in with Google")
+         │ Google OAuth flow (NextAuth.js)
+         ▼
+  /setup (protected — unauthenticated visitors redirect to /)
+
 INPUT LAYER
   Pinterest OAuth → board selector → user preferences (size, price, brands)
          │
@@ -86,6 +96,12 @@ AGENT 4: LEARNING LOOP
 ## Data Model
 
 ```
+User
+  id: uuid
+  google_id: string
+  email: string
+  created_at: timestamp
+
 StyleProfile
   id: uuid
   created_at: timestamp
@@ -127,10 +143,13 @@ Listing
 stylematch/
   frontend/                   # Next.js app
     app/
-      page.tsx                # Setup screen (board selector + prefs)
-      results/page.tsx        # Results screen
-      profile/page.tsx        # StyleProfile debug view
+      page.tsx                # Landing page (app description + Google sign-in)
+      setup/page.tsx          # Setup screen (board selector + prefs) — auth-gated
+      results/page.tsx        # Results screen — auth-gated
+      profile/page.tsx        # StyleProfile debug view — auth-gated
+      api/auth/[...nextauth]/ # NextAuth.js route handler
     components/
+    middleware.ts             # Redirects unauthenticated users to /
   backend/                    # FastAPI
     agents/
       style_analyst.py        # Agent 1 + sub-agent coordinator
@@ -145,6 +164,7 @@ stylematch/
       pipeline.py             # POST /pipeline/run
       feedback.py             # POST /feedback
       boards.py               # GET /boards (Pinterest)
+      auth.py                 # Session validation middleware (JWT)
     lib/
       pinterest.py            # OAuth + boards/pins client
       context.py              # style_context.md read/write
