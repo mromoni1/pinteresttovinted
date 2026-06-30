@@ -1,4 +1,7 @@
 ## Learning
 
+## [2026-06-30] — Planning
+Pinterest API access requires an app approval process (not just credential creation): the developer portal requires a website URL, a hosted privacy policy, and Pinterest reviews the app before granting production access. During development mode, only explicitly whitelisted Pinterest accounts can authenticate. This creates a hard dependency before the OAuth flow can be tested with real data. → When planning issues that depend on third-party OAuth APIs, research the approval/review process upfront and surface it as a blocking prerequisite — not something discovered mid-implementation. For Pinterest specifically, flag that standard API scopes (`boards:read`, `pins:read`) require app review and that the integration cannot be end-to-end tested until approval is granted.
+
 ### `list[str]` vs `list[list[str]]` — be concrete about what "multiple keyword sets" means
 When discussing `SearchStrategy.keywords`, I explained `list[str]` as "one Vinted search call" without clarifying it already supports multiple keywords (e.g. `["linen", "trousers", "beige"]`). The user thought I was implying only one keyword per strategy. Always give a concrete example value when describing a list type to avoid ambiguity. 
