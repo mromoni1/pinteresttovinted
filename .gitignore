@@ -18,3 +18,6 @@ node_modules/
 
 # OS
 .DS_Store
+
+# Local dev scripts
+run_dev
