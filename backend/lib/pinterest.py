@@ -90,7 +90,7 @@ async def _get_access_token() -> str:
     return token["access_token"]
 
 
-def get_auth_url(redirect_uri: str) -> str:
+def get_auth_url(redirect_uri: str, next: str = "/setup") -> str:
     """Return the Pinterest OAuth URL. Caller should redirect the user there."""
     state = secrets.token_urlsafe(32)
     verifier = secrets.token_urlsafe(64)
@@ -100,6 +100,7 @@ def get_auth_url(redirect_uri: str) -> str:
     _oauth_state["state"] = state
     _oauth_state["verifier"] = verifier
     _oauth_state["redirect_uri"] = redirect_uri
+    _oauth_state["next"] = next
 
     params = {
         "client_id": _client_id(),
@@ -113,8 +114,8 @@ def get_auth_url(redirect_uri: str) -> str:
     return f"{_AUTH_URL}?{urlencode(params)}"
 
 
-async def exchange_code(code: str, state: str) -> None:
-    """Exchange the authorization code for an access token and save it locally."""
+async def exchange_code(code: str, state: str) -> str:
+    """Exchange the authorization code for a token, save it locally, return the next path."""
     if state != _oauth_state.get("state"):
         raise ValueError("OAuth state mismatch — possible CSRF")
 
@@ -134,7 +135,9 @@ async def exchange_code(code: str, state: str) -> None:
     token = resp.json()
     token["expires_at"] = time.time() + token.get("expires_in", 3600)
     _save_token(token)
+    next_path = _oauth_state.get("next", "/setup")
     _oauth_state.clear()
+    return next_path
 
 
 async def get_boards() -> list[PinterestBoard]:
