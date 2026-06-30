@@ -16,6 +16,7 @@ When a task involves repeated, parallelizable, or context-heavy work, flag wheth
 it warrants a Claude Code subagent. Recommend name, description, model, and tool 
 scope if so.
 
+
 ## Stack
 - Frontend: Next.js (App Router) + Tailwind
 - Backend: Python FastAPI
@@ -79,6 +80,19 @@ Key flow: Style Analyst spawns parallel sub-agents (ADR-003) → aggregates into
 - After implementing an agent stage, write a verification test before moving to the next stage.
 - When you make a mistake worth remembering, append it to `learning.md` immediately.
 - Use `IMPORTANT:` prefix for rules that have been violated before.
+
+## Learning Log
+Append to `learning.md` immediately when any of these occur:
+- A fix is needed because an earlier approach was wrong (not just incomplete)
+- A subagent's output failed acceptance criteria and had to be redone
+- You catch yourself about to repeat a previously-logged mistake — check 
+  learning.md before non-trivial changes to agents/, sources/, or prompts/
+- The user corrects your output or says "that's wrong" / "don't do that"
+
+Format: `## [date] — [component]\n[what happened] → [what to do instead]`
+
+Do not wait to be asked. Do not batch corrections for later — write them 
+as they happen, in the same turn.
 
 ## Git
 See @.claude/skills/git-issues/SKILL.md for issue creation
