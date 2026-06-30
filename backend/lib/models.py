@@ -57,3 +57,17 @@ class Listing(BaseModel):
 class ScoredListing(Listing):
     score: float
     reasoning: str
+
+
+class PinterestBoard(BaseModel):
+    id: str
+    name: str
+    thumbnail_url: Optional[str] = None
+
+
+class PinterestPin(BaseModel):
+    id: str
+    image_url: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    link: Optional[str] = None

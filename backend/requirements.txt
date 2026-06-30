@@ -5,6 +5,7 @@ pydantic==2.13.4
 pytest==9.1.1
 pytest-asyncio==1.4.0
 python-dotenv==1.2.2
+respx==0.23.1
 ruff==0.15.20
 supabase==2.31.0
 uvicorn==0.49.0

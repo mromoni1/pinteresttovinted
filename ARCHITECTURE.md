@@ -190,6 +190,40 @@ stylematch/
 
 ---
 
+## UI Design System
+
+### Visual Direction
+Off-white/beige background. Accent colors — red, light blue, pink — used as pops against the neutral base, never as dominant fills. Sharp corners, minimal border-radius, hairline borders. Confident editorial typography. Not soft, not rounded, not pastel-heavy — think editorial fashion.
+
+### Screens
+
+**Screen 1 — Landing (unauthenticated)**
+Single-purpose: app description + "Sign in with Google" CTA. No nav.
+
+**Screen 2 — Setup**
+Form with all fields optional except board selection (required to proceed):
+- Price range selector ($ – $$$$)
+- Size selectors: tops, bottoms, shoes
+- Color scheme preference picker
+- Style keyword chips (multi-select grid)
+- Pinterest board/pin selector — triggers Pinterest OAuth if not yet connected
+
+**Screen 3 — Results**
+Two-column persistent split (see ui-explorer Direction 1 rationale):
+- Left column (fixed, does not scroll): 5 anchor pins, each labeled with the aesthetic quality it represents. Below pins: "Import more pins" button (triggers regeneration).
+- Right column (scrollable): ranked listing feed — image, price, size, brand, inline 1–5 rating control per card. Top-right: "Regenerate results" button.
+- Loading state: intentional branded placeholder, not a generic spinner.
+
+**Screen 4 — Profile**
+Edit all setup preferences (price range, sizes, colors, style keywords, connected boards). Persistent bottom-right nav across all screens: profile icon + sign-out.
+
+### Component Rules
+- Typography, spacing, and component style are identical across all 4 screens — one design system, not 4 separate designs
+- Accent colors applied as interactive/highlight states only, not background fills
+- Sharp corners throughout; avoid rounded softness
+
+---
+
 ## Phase 2 (Planned)
 
 Reverse pipeline: Vinted likes/purchases → aesthetic inference → Pinterest board creation.
